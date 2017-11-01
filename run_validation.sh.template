@@ -11,7 +11,7 @@
 # Modify this variables
 PORT=
 USER=
-DATAPATH=`pwd`/validation_set/social_network/num_date
+DATAPATH=`pwd`/validation_set/social_network/string_date
 
 echo " ========================================= "
 echo " AgensGraph LDBC validation running script "
@@ -34,11 +34,11 @@ then
   tar zxf neo4j--validation_set.tar.gz -C validation_set
 fi
 
-dropdb -p $PORT agensgraph_ldbc_validation
-createdb -p $PORT --lc-collate='C' --template=template0 agensgraph_ldbc_validation
+dropdb -p $PORT social_media_db
+createdb -p $PORT --lc-collate='C' --template=template0 social_media_db
 
 cat > validation.conf <<EOF
-DBNAME=agensgraph_ldbc_validation
+DBNAME=social_media_db
 PORT=$PORT
 USER=$USER
 DATAPATH=$DATAPATH
@@ -47,11 +47,11 @@ EOF
 load_queries/load.sh validation.conf
 rm -f validation.conf
 
-java -cp target/classes/jeeves-0.3-SNAPSHOT.jar:target/classes/agensgraph-jdbc-0.9.0-SNAPSHOT.jar:target/classes com.ldbc.driver.Client \
--P validation.properties \
--p dbname agensgraph_ldbc_validation \
--p port $PORT \
--p user $USER \
--p validate_database validation_set/validation_params.csv \
--p ldbc.snb.interactive.parameters_dir validation_set/substitution_parameters \
--p ldbc.snb.interactive.updates_dir validation_set/social_network 2>ldbc_validation_err.log
+#java -cp target/classes/jeeves-0.3-SNAPSHOT.jar:target/classes/agensgraph-jdbc-0.9.0-SNAPSHOT.jar:target/classes com.ldbc.driver.Client \
+#-P validation.properties \
+#-p dbname agensgraph_ldbc_validation \
+#-p port $PORT \
+#-p user $USER \
+#-p validate_database validation_set/validation_params.csv \
+#-p ldbc.snb.interactive.parameters_dir validation_set/substitution_parameters \
+#-p ldbc.snb.interactive.updates_dir validation_set/social_network 2>ldbc_validation_err.log

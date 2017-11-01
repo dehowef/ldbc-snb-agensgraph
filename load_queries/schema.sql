@@ -1,9 +1,9 @@
 \timing on
 
-DROP GRAPH ldbc CASCADE;
-CREATE GRAPH ldbc;
-SET GRAPH_PATH = ldbc;
-ALTER DATABASE :target_db SET graph_path = ldbc ;
+DROP GRAPH socialgraph CASCADE;
+CREATE GRAPH socialgraph;
+SET GRAPH_PATH = socialgraph;
+ALTER DATABASE :target_db SET graph_path = socialgraph ;
 
 -- Make Vertex Labels
 CREATE VLABEL Forum DISABLE INDEX;

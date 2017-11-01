@@ -9,17 +9,17 @@ begin
 	latestLikeTime := 0;
 	foreach elem in array likes
 	loop
-		if (elem->>'likeTime')::int8 > latestLikeTime
+		if (elem->>'likeTime') > latestLikeTime
 		then
-			latestLikeTime := (elem->>'likeTime')::int8;
-			latestLikeId := (elem->>'id')::int8;
+			latestLikeTime := (elem->>'likeTime');
+			latestLikeId := (elem->>'id');
 			latestLike := elem;
-		elsif (elem->>'likeTime')::int8 = latestLikeTime
+		elsif (elem->>'likeTime') = latestLikeTime
 		then
-			if (elem->>'id')::int8 < latestLikeId
+			if (elem->>'id') < latestLikeId
 			then
-				latestLikeTime := (elem->>'likeTime')::int8;
-				latestLikeId := (elem->>'id')::int8;
+				latestLikeTime := (elem->>'likeTime');
+				latestLikeId := (elem->>'id');
 				latestLike := elem;
 			end if;
 		end if;
@@ -38,7 +38,7 @@ returns int8 as $$
 	from unnest(post_ids) x (id)
 	where exists (select 1
 				  from (match (post:Post)-[:hasTagPost]->(:Tag)<-[:hasInterest]-(p:Person)
-				  where post.id::int8 = x.id and p.id::int8 = person_id return 1) y);
+				  where post.id = x.id and p.id = person_id return 1) y);
 $$ language sql;
 
 create or replace function upd_reply_weight (p1id bigint, postid bigint, commentid bigint)
@@ -50,8 +50,8 @@ declare
   	inc double precision;
 begin
 	match (m:message)-[:hasCreator]->(creator:Person)
-	where m.id::int8 = postid + commentid + 1
-	return creator.id::int8 into p2id;
+	where m.id = postid + commentid + 1
+	return creator.id into p2id;
 	if not found then
 		return 0;
 	end if;
@@ -89,7 +89,7 @@ begin
 	FROM (SELECT 1
 	FROM (
 		match (p1:Person)<-[:hasCreatorComment]-(:"Comment")-[:replyOfPost]->(:Post)-[:hasCreatorPost]->(p2:Person)
-		where p1.id::int8 = p1id and p2.id::int8 = p2id
+		where p1.id = p1id and p2.id = p2id
 		RETURN 1 AS col1) AS dummy
 	FOR UPDATE) AS dummy;
 
@@ -97,7 +97,7 @@ begin
 	FROM (SELECT 1
 	FROM (
 		match (p1:Person)<-[:hasCreatorComment]-(:"Comment")-[:replyOfPost]->(:Post)-[:hasCreatorPost]->(p2:Person)
-		where p1.id::int8 = p2id and p2.id::int8 = p1id
+		where p1.id = p2id and p2.id = p1id
 		RETURN 1 AS col1) AS dummy
 	FOR UPDATE) AS dummy;
 
@@ -105,7 +105,7 @@ begin
 	FROM (SELECT 1
 	FROM (
 		match (p1:Person)<-[:hasCreatorComment]-(:"Comment")-[:replyOfComment]->(:"Comment")-[:hasCreatorComment]->(p2:Person)
-		where p1.id::int8 = p1id and p2.id::int8 = p2id
+		where p1.id = p1id and p2.id = p2id
 		RETURN 1 AS col1) AS dummy
 	FOR UPDATE) AS dummy;
 
@@ -113,7 +113,7 @@ begin
 	FROM (SELECT 1
 	FROM (
 		match (p1:Person)<-[:hasCreatorComment]-(:"Comment")-[:replyOfComment]->(:"Comment")-[:hasCreatorComment]->(p2:Person)
-		where p1.id::int8 = p2id and p2.id::int8 = p1id
+		where p1.id = p2id and p2.id = p1id
 		RETURN 1 AS col1) AS dummy
 	FOR UPDATE) AS dummy;
 
@@ -265,7 +265,7 @@ declare
 begin
 	foreach gid in array graphids
 	loop
-		match (p:Person) where id(p) = gid return p.id::int8 into pid;
+		match (p:Person) where id(p) = gid return p.id into pid;
 		ret := array_append(ret, pid);
 	end loop;
 	return ret;
@@ -278,7 +278,7 @@ declare
 	graphids graphid[];
 begin
 	if p1.id = p2.id then
-		return array[(p1.properties->>'id')::int8];
+		return array[(p1.properties->>'id')];
 	end if;
 	select paths into graphids from knows_shortestpaths(id(p1), id(p2)) limit 1;
 	if not found then
@@ -302,7 +302,7 @@ begin
 	end if;
 
 	match (p1:Person), (p2:Person)
-	where p1.id::int8 = p1_id and p2.id::int8 = p2_id return id(p1), id(p2)
+	where p1.id = p1_id and p2.id = p2_id return id(p1), id(p2)
 	into g1, g2;
 
 	for graphids in select paths from knows_shortestpaths(g1, g2)
